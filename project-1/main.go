@@ -186,17 +186,8 @@ func (rcc *ReolinkCameraClient) GetRTSPURL() string {
 	return fmt.Sprintf(url_template, rcc.Username, rcc.Password, rcc.Host, rcc.Port)
 }
 
-func (rcc *ReolinkCameraClient) doStreamRTSP() error {
+func (rcc *ReolinkCameraClient) StreamRTSP() error {
 	return rcc.RTSPClient.Stream(rcc.GetRTSPURL())
-}
-
-// StartRTSPStreamLoop indefinitely attempts to connect to the target host a stream RTSP feed to disk
-func (rcc *ReolinkCameraClient) StartRTSPStreamLoop(b backoff.BackOff) error {
-	err := backoff.Retry(rcc.doStreamRTSP, b)
-	if err != nil {
-		return fmt.Errorf("could not maintain RTSP connection: %s", err)
-	}
-	return nil
 }
 
 func main() {
@@ -238,12 +229,12 @@ func main() {
 		},
 	)
 
-	err = camera.StartRTSPStreamLoop(
-		backoff.NewExponentialBackOff(
-			backoff.WithMaxElapsedTime(30 * time.Second),
-		),
+	b := backoff.NewExponentialBackOff(
+		backoff.WithMaxElapsedTime(30 * time.Second),
 	)
+
+	err = backoff.Retry(camera.StreamRTSP, b)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("could not maintain RTSP connection: %s", err))
 	}
 }
