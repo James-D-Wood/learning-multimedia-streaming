@@ -13,8 +13,12 @@ I am using a Reolink Wi-Fi enabled camera here at home. After some exploration, 
 
 ## First Project - Exploring Client Options
 
-As a first step, I'd like to write some simple client code to connect to a camera on my network and record the live stream to an .mp4 file on my laptop. 
+As a first step, I'd like to write some simple client code to connect to a camera on my network and record the live stream to an playable file on my laptop. 
 
 To do so, I am going to use [gortsplib](https://github.com/bluenviron/gortsplib) to connect to my device.
+
+In the example code, we connect to a locally running Reolink IP camera, stream the MPEG-4 and H264 feeds and write the result to a TS file on the disk. I've implemented a simple backoff to allow for momentarily lapses in connection if the device is reset or unplugged.
+
+## TODO: learn internals of above code and do write up
 
 
