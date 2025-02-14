@@ -24,6 +24,7 @@ type GoRTSPLibClient struct {
 }
 
 func (c *GoRTSPLibClient) Stream(url string) error {
+	fmt.Println(url)
 	startTime := time.Now()
 
 	u, err := base.ParseURL(url)
@@ -225,15 +226,34 @@ func main() {
 				OnPacketLost: func(err error) {
 					fmt.Println("PACKET LOSS:", err)
 				},
+				OnServerRequest: func(r *base.Request) {
+					fmt.Printf(`
+Request
+    Method: %s
+	URL: %s
+	Body: %s
+
+					`, r.Method, r.URL, r.Body)
+				},
+				OnServerResponse: func(r *base.Response) {
+					fmt.Printf(`
+Response
+	StatusCode: %d
+	StatusMessage: %s
+	String: %s
+
+					`, r.StatusCode, r.StatusMessage, r.String())
+				},
 			},
 		},
 	)
 
-	b := backoff.NewExponentialBackOff(
-		backoff.WithMaxElapsedTime(30 * time.Second),
-	)
+	b := backoff.StopBackOff{}
+	// b := backoff.NewExponentialBackOff(
+	// 	backoff.WithMaxElapsedTime(30 * time.Second),
+	// )
 
-	err = backoff.Retry(camera.StreamRTSP, b)
+	err = backoff.Retry(camera.StreamRTSP, &b)
 	if err != nil {
 		panic(fmt.Errorf("could not maintain RTSP connection: %s", err))
 	}
